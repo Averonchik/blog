@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Лента</title>
+        <title>Blog - {{ author }}</title>
     </head>
     <body>
         {% for post in posts %}
         <div>
             <h2><a href="{% url 'post' pk=post.pk %}">{{ post.title }}</a></h2>
-            <p><a href="{% url 'blog' pk=post.author.pk %}">{{ post.author }}</a></p>
             <p>{{ post.date }}</p>
             <p>{{ post.entry|linebreaksbr }}</p>
         </div>

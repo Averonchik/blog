@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, get_list_or_404
+from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Post
 
@@ -9,11 +10,14 @@ def post_list(request):
     return render(request, 'blogapp/post_list.html', {'posts': posts})
 
 
-def post(request):
+def post(request, pk):
     # Отображение однго поста
-    return render(request, 'blogapp/post.html')
+    p = get_object_or_404(Post, pk=pk)
+    return render(request, 'blogapp/post.html', {'post': p})
 
 
-def blog(request):
+def blog(request, pk):
     # Отображение персонального блога
-    return render(request, 'blogapp/blog.html')
+    posts = get_list_or_404(Post.objects.order_by('date').reverse(), author=pk)
+    author = get_object_or_404(User, pk=pk)
+    return render(request, 'blogapp/blog.html', {'posts': posts, 'author': author})

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ post.title }}</title>
+</head>
+<body>
+    <div>
+        <h1>{{ post.title }}</h1>
+            <p><a href="{% url 'blog' pk=post.author.pk %}">{{ post.author }}</a></p>
+        <p>{{ post.date }}</p>
+        <p>{{ post.entry|linebreaksbr }}</p>
+    </div>
+</body>
+</html>
