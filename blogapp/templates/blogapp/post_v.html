@@ -1,7 +1,5 @@
 {% extends "blogapp/base.html" %}
-{% block title %}Лента{% endblock title %}
+{% block title %}Пост - {{ post.title }}{% endblock title %}
 {% block content %}
-    {% for post in posts %}
         {% include 'blogapp/post.html' %}
-    {% endfor %}
 {% endblock content %}

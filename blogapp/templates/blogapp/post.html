@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>{{ post.title }}</title>
-</head>
-<body>
-    <div>
-        <h1>{{ post.title }}</h1>
-            <p><a href="{% url 'blog' pk=post.author.pk %}">{{ post.author }}</a></p>
-        <p>{{ post.date }}</p>
-        <p>{{ post.entry|linebreaksbr }}</p>
-    </div>
-</body>
-</html>
+<div>
+    <h2><a href="{% url 'post' pk=post.pk %}">{{ post.title }}</a></h2>
+    <p><a href="{% url 'blog' pk=post.author.pk %}">{{ post.author }}</a></p>
+    <p>{{ post.date }}</p>
+    <p>{{ post.entry|linebreaksbr }}</p>
+    {% if request.user == post.author %}
+        <a href="{% url 'edit_post' pk=post.pk %}">Edit</a>
+        <a href="{% url 'delete_post' pk=post.pk %}">Delete</a>
+    {% endif %}
+    <a href="{% url 'read_post' pk=post.pk %}">Read</a>
+</div>

@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Blog - {{ author }}</title>
-    </head>
-    <body>
+{% extends "blogapp/base.html" %}
+{% block title %}Блог - {{ author }}{% endblock title %}
+{% block content %}
+
+        <a href="{% url 'follow' pk=author.pk %}">Follow</a>
         {% for post in posts %}
-        <div>
-            <h2><a href="{% url 'post' pk=post.pk %}">{{ post.title }}</a></h2>
-            <p>{{ post.date }}</p>
-            <p>{{ post.entry|linebreaksbr }}</p>
-        </div>
+        {% include 'blogapp/post.html' %}
         {% endfor %}
-    </body>
-</html>
+{% endblock content %}
