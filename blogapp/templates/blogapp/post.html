@@ -8,4 +8,5 @@
         <a href="{% url 'delete_post' pk=post.pk %}">Delete</a>
     {% endif %}
     <a href="{% url 'read_post' pk=post.pk %}">Read</a>
+    <a href="{% url 'unread_post' pk=post.pk %}">Unread</a>
 </div>

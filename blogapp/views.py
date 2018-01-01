@@ -1,14 +1,26 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import Post
+from django.core.mail import send_mail
+from .models import Post, ProfileUser
 from .forms import PostForm
 
 
 # Create your views here.
 def post_list(request):
-    posts = Post.objects.filter(date__lte=timezone.now()).order_by('date').reverse()
+    profiles = []
+    post_pk = []
+    for profile in ProfileUser.objects.all():
+        subs = profile.subscribers.all()
+        for sub in subs.all():
+            if request.user == sub.user:
+                profiles.append(profile.user.pk)
+        if profile.user == request.user:
+            for pk in profile.read_posts.all():
+                post_pk.append(pk.pk)
+    posts = Post.objects.filter(author__pk__in=profiles).exclude(pk__in=post_pk).order_by('date').reverse()
     return render(request, 'blogapp/post_list.html', {'posts': posts})
 
 
@@ -20,7 +32,7 @@ def post(request, pk):
 
 def blog(request, pk):
     # Отображение персонального блога
-    posts = Post.objects.filter(author__lte=pk).order_by('date').reverse()
+    posts = Post.objects.filter(author=pk).order_by('date').reverse()
     author = get_object_or_404(User, pk=pk)
     return render(request, 'blogapp/blog.html', {'posts': posts, 'author': author})
 
@@ -33,6 +45,11 @@ def new_post(request):
             post.author = request.user
             post.date = timezone.now()
             post.save()
+            user = ProfileUser.objects.get(user=post.author)
+            emails = []
+            for sub in user.subscribers.all():
+                emails.append(sub.user.email)
+            send_mail("В блоге у %s новый пост" % (post.author), "%s%s" % (get_current_site(request), redirect('post', pk=post.pk).url), "yurgin.rodion@gmail.com", emails)
         return redirect('post', pk=post.pk)
     else:
         form = PostForm
@@ -62,7 +79,14 @@ def edit_post(request, pk):
 @login_required
 def follow(request, pk):
     user = get_object_or_404(User, pk=pk)
-    request.user.profile.subscribers.add(user.profile)
+    user.profile.subscribers.add(request.user.profile)
+    return redirect('/')
+
+
+@login_required
+def unfollow(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.profile.subscribers.remove(request.user.profile)
     return redirect('/')
 
 
@@ -70,4 +94,11 @@ def follow(request, pk):
 def read_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
     request.user.profile.read_posts.add(post)
+    return redirect('/')
+
+
+@login_required
+def unread_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    request.user.profile.read_posts.remove(post)
     return redirect('/')

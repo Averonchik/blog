@@ -3,6 +3,7 @@
 {% block content %}
 
         <a href="{% url 'follow' pk=author.pk %}">Follow</a>
+        <a href="{% url 'unfollow' pk=author.pk %}">Unfollow</a>
         {% for post in posts %}
         {% include 'blogapp/post.html' %}
         {% endfor %}
