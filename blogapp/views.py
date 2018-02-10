@@ -10,22 +10,21 @@ from .forms import PostForm
 
 # Create your views here.
 def post_list(request):
-    profiles = []
-    post_pk = []
+    profiles, post_pk = [], []
     for profile in ProfileUser.objects.all():
-        subs = profile.subscribers.all()
-        for sub in subs.all():
+        for sub in profile.subscribers.all():
             if request.user == sub.user:
                 profiles.append(profile.user.pk)
         if profile.user == request.user:
             for pk in profile.read_posts.all():
                 post_pk.append(pk.pk)
-    posts = Post.objects.filter(author__pk__in=profiles).exclude(pk__in=post_pk).order_by('date').reverse()
+    posts = Post.objects.filter(author__pk__in=profiles) \
+        .exclude(pk__in=post_pk).order_by('-date')
     return render(request, 'blogapp/post_list.html', {'posts': posts})
 
 
 def post(request, pk):
-    # Отображение однго поста
+    # Отображение одного поста
     p = get_object_or_404(Post, pk=pk)
     return render(request, 'blogapp/post_v.html', {'post': p})
 
@@ -34,9 +33,11 @@ def blog(request, pk):
     # Отображение персонального блога
     posts = Post.objects.filter(author=pk).order_by('date').reverse()
     author = get_object_or_404(User, pk=pk)
-    return render(request, 'blogapp/blog.html', {'posts': posts, 'author': author})
+    return render(request, 'blogapp/blog.html',
+                  {'posts': posts, 'author': author})
 
 
+@login_required
 def new_post(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -49,8 +50,15 @@ def new_post(request):
             emails = []
             for sub in user.subscribers.all():
                 emails.append(sub.user.email)
-            send_mail("В блоге у %s новый пост" % (post.author), "%s%s" % (get_current_site(request), redirect('post', pk=post.pk).url), "yurgin.rodion@gmail.com", emails)
-        return redirect('post', pk=post.pk)
+            send_mail(
+                "В блоге у %s новый пост" % (post.author),
+                "%s%s" % (get_current_site(request),
+                          redirect('post', pk=post.pk).url),
+                "yurgin.rodion@gmail.com", emails
+            )
+            return redirect('post', pk=post.pk)
+        else:
+            return redirect('/')
     else:
         form = PostForm
         return render(request, 'blogapp/new_post.html', {'form': form})

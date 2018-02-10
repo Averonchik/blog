@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 class ProfileUser(models.Model):
     user = models.ForeignKey(User, related_name='author')
-    subscribers = models.ManyToManyField('self', related_name='subs', symmetrical=False)
+    subscribers = models.ManyToManyField('self', related_name='subs',
+                                         symmetrical=False)
     read_posts = models.ManyToManyField('Post', related_name='read')
 
     def __str__(self):
